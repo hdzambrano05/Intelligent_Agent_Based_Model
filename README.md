@@ -26,7 +26,7 @@ El sistema ayuda a identificar ambigüedades, inconsistencias y posibles mejoras
 reqcheck/
 ├── agents.py           # Agentes inteligentes y lógica principal
 ├── evaluate.py         # Evalúa el modelo usando dataset.json
-├── app.py              # Archivo principal de la aplicación
+├── app.py              # Archivo principal de la aplicación (FastAPI)
 ├── dataset.json        # Datos de prueba / requisitos
 ├── back.txt            # Librerías usadas en Python
 ├── .gitignore          # Archivos ignorados por Git
@@ -64,18 +64,32 @@ pip install -r requirements.txt
 
 ## ⚙️ Uso básico
 
-```python
-from modelo.model import ModeloAgentes
-
-# Inicializar modelo
-modelo = ModeloAgentes()
-
-# Evaluar requisito de ejemplo
-requisito = "El sistema debe permitir registrar usuarios con nombre, correo y contraseña"
-resultado = modelo.analizar_requisito(requisito)
-
-print(resultado)
+### 1. Probar el modelo directamente
+```bash
+python agents.py
 ```
+Esto imprimirá en consola la evaluación de un requisito de ejemplo.
+
+---
+
+### 2. Iniciar la aplicación (`app.py`) con FastAPI
+```bash
+uvicorn app:app --reload
+```
+- `app:app` → el primer `app` es el nombre del archivo (`app.py`), el segundo `app` es la instancia de FastAPI.  
+- `--reload` → permite que los cambios en el código se actualicen automáticamente.  
+
+#### Probar con Postman:
+- URL: `http://127.0.0.1:8000/evaluar`  
+- Método: `POST`  
+- Body (JSON):
+```json
+{
+  "requisito": "El sistema debe permitir registrar usuarios con nombre, correo y contraseña"
+}
+```
+
+Recibirás en la respuesta el análisis generado por el modelo.
 
 ---
 
