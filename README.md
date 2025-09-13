@@ -24,12 +24,14 @@ El sistema ayuda a identificar ambigüedades, inconsistencias y posibles mejoras
 
 ```
 reqcheck/
-├── modelo/                # Código del modelo de agentes inteligentes
-│   ├── model.py           # Archivo principal del modelo
-│   └── agents.py          # Agentes inteligentes y lógica
-├── .gitignore             # Archivos ignorados por Git
-├── README.md              # Documentación
-└── LICENSE
+├── agents.py           # Agentes inteligentes y lógica principal
+├── evaluate.py         # Evalúa el modelo usando dataset.json
+├── app.py              # Archivo principal de la aplicación
+├── dataset.json        # Datos de prueba / requisitos
+├── back.txt            # Librerías usadas en Python
+├── .gitignore          # Archivos ignorados por Git
+├── README.md           # Documentación
+└── LICENSE             # Licencia del proyecto
 ```
 
 > **Nota:** Archivos sensibles como `config.py` o `.env` **no se suben al repositorio**.
