@@ -108,7 +108,3 @@ Recibirás en la respuesta el análisis generado por el modelo.
 - [IA Generativa](https://openai.com/research)
 
 ---
-
-## ⚡ Licencia
-
-Este proyecto está bajo la **licencia MIT**. Consulta el archivo [LICENSE](LICENSE) para más detalles.
