@@ -30,8 +30,7 @@ reqcheck/
 ├── dataset.json        # Datos de prueba / requisitos
 ├── back.txt            # Librerías usadas en Python
 ├── .gitignore          # Archivos ignorados por Git
-├── README.md           # Documentación
-└── LICENSE             # Licencia del proyecto
+└── README.md           # Documentación
 ```
 
 > **Nota:** Archivos sensibles como `config.py` o `.env` **no se suben al repositorio**.
