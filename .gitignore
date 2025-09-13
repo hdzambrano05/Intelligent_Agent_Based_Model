@@ -1,0 +1,49 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+ENV/
+
+# Archivos de configuración locales
+*.env
+*.ini
+*.cfg
+*.toml
+*.yaml
+*.yml
+
+# Archivos de base de datos locales
+*.sqlite3
+*.db
+
+# Compilados de Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Logs
+*.log
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Configuración de editores
+.vscode/
+.idea/
+*.swp
+
+# Archivos de pruebas/coverage
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Archivos de distribución/paquetes
+build/
+dist/
+*.egg-info/
+
+# Archivo de configuración con claves
+config.py
+

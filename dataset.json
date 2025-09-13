@@ -1,0 +1,222 @@
+[
+  {
+    "id": "REQ-001",
+    "text": "El sistema debe registrar todas las ventas con fecha, hora, identificador de transacción y monto.",
+    "context": "Aplicación de punto de venta, seguimiento financiero y control de inventario.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": true,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-002",
+    "text": "El sistema debe procesar solicitudes de manera eficiente, respondiendo en menos de 2 segundos por operación.",
+    "context": "Aplicación web para usuarios con alta concurrencia.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": true,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-003",
+    "text": "Registrar un usuario nuevo y enviar automáticamente un correo de bienvenida con enlace de activación.",
+    "context": "Módulo de autenticación de usuarios.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": true,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-004",
+    "text": "El sistema debe soportar al menos 200 usuarios concurrentes sin degradar la performance.",
+    "context": "Aplicación SaaS con alta demanda de usuarios.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": true,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-005",
+    "text": "El sistema debe aplicar IVA del 19% a las ventas según la normativa DIAN vigente.",
+    "context": "Sistema contable para facturación y control tributario.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": true,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-006",
+    "text": "El sistema debe generar un reporte mensual en PDF que incluya cliente, monto total y detalle de transacciones.",
+    "context": "Módulo de informes financieros para contabilidad y auditoría.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": true,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-007",
+    "text": "El sistema debe permitir cambiar la apariencia de la interfaz, incluyendo colores y fuentes, manteniendo accesibilidad.",
+    "context": "Interfaz estética personalizable según perfil del usuario.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": false,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-008",
+    "text": "El sistema debe alertar cuando el inventario esté bajo, enviar correos automáticos a los responsables y actualizar precios según reglas predefinidas.",
+    "context": "Gestión de inventario con alertas y actualización automática.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": false,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-009",
+    "text": "El sistema debe bloquear la cuenta de un usuario tras 3 intentos fallidos de inicio de sesión y enviar una notificación al correo registrado.",
+    "context": "Seguridad de autenticación de usuarios y prevención de ataques de fuerza bruta.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": true,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-010",
+    "text": "El sistema debe permitir exportar reportes a Excel en un solo clic, manteniendo el formato de columnas y filtros aplicados.",
+    "context": "Módulo de reportes con exportación rápida y precisa.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": true,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-011",
+    "text": "El sistema debe realizar copias de seguridad automáticas cada 24 horas y conservarlas durante 30 días.",
+    "context": "Seguridad y recuperación de datos críticos.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": true,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-012",
+    "text": "El sistema debe permitir que los usuarios cambien su contraseña cada 90 días y notificar si la contraseña expira.",
+    "context": "Seguridad de cuentas y gestión de usuarios.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": true,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-013",
+    "text": "El sistema debe generar alertas de errores críticos en tiempo real y registrar el evento en el historial de auditoría.",
+    "context": "Módulo de monitoreo y logging de la aplicación.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": true,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-014",
+    "text": "El sistema debe permitir búsqueda avanzada de productos por nombre, categoría y rango de precio, mostrando resultados paginados.",
+    "context": "Catálogo de productos para e-commerce.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": false,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-015",
+    "text": "El sistema debe registrar todas las transacciones de usuarios con ID, fecha, hora y monto, y mantener un historial de 12 meses.",
+    "context": "Control financiero y auditoría interna.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": true,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-016",
+    "text": "El sistema debe enviar notificaciones de pago pendiente 3 días antes de la fecha de vencimiento y repetir cada 24 horas hasta el pago.",
+    "context": "Módulo de facturación y cobranza automatizada.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": false,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-017",
+    "text": "El sistema debe permitir integración con la pasarela de pagos PayU y registrar transacciones exitosas y fallidas.",
+    "context": "Pagos en línea seguros para e-commerce.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": false,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-018",
+    "text": "El sistema debe permitir generación de reportes gráficos de ventas mensuales por producto, categoría y cliente.",
+    "context": "Módulo de análisis de ventas y BI.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": false,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-019",
+    "text": "El sistema debe autenticar usuarios mediante correo y contraseña y bloquear sesión tras 3 intentos fallidos.",
+    "context": "Seguridad y control de acceso de la aplicación.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": true,
+      "complete": true,
+      "valid": true
+    }
+  },
+  {
+    "id": "REQ-020",
+    "text": "El sistema debe permitir exportación de datos a CSV y PDF, incluyendo filtros aplicados y ordenamiento por columnas.",
+    "context": "Módulo de reportes flexible y multi-formato.",
+    "annotations": {
+      "ambiguous": false,
+      "atomic": false,
+      "complete": true,
+      "valid": true
+    }
+  }
+]
