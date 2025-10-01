@@ -1,8 +1,8 @@
 import re
 import json
 import logging
+import asyncio
 import google.generativeai as genai
-
 from typing import Dict, Any
 from config import GEMINI_API_KEY
 
@@ -15,14 +15,16 @@ logging.basicConfig(
 )
 
 
-def ask_gemini(prompt: str, model="gemini-2.5-flash") -> str:
-    """Envía un prompt al modelo Gemini y devuelve la respuesta en texto."""
+# ------------------- Funciones utilitarias -------------------
+async def ask_gemini(prompt: str, model="gemini-2.5-flash") -> str:
+    """Envía un prompt al modelo Gemini y devuelve la respuesta en texto (async)."""
     try:
         model_instance = genai.GenerativeModel(model_name=model)
-        response = model_instance.generate_content(prompt)
+        loop = asyncio.get_event_loop()
+        # Ejecutar en un hilo separado para no bloquear asyncio
+        response = await loop.run_in_executor(None, model_instance.generate_content, prompt)
         return response.text if hasattr(response, "text") else str(response)
-
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         logging.exception("Error en ask_gemini")
         return json.dumps({"error": str(e)})
 
@@ -34,7 +36,6 @@ def safe_json_loads(text: str) -> dict:
         if match:
             return json.loads(match.group(0))
         return {"raw_response": text, "error": "No JSON encontrado"}
-
     except json.JSONDecodeError as e:
         return {"error": "JSON inválido", "detalle": str(e), "raw_response": text}
 
@@ -44,8 +45,8 @@ class Agent:
     def __init__(self, role: str):
         self.role = role
 
-    def analyze(self, req: Dict[str, Any]) -> Dict[str, Any]:
-        """Genera un análisis del requisito según el rol (sin refinamiento)."""
+    async def analyze(self, req: Dict[str, Any]) -> Dict[str, Any]:
+        """Genera un análisis del requisito según el rol (ahora async)."""
         text = req["text"]
         context = req.get("context", "")
         palabras_vagas = ["rápido", "adecuado", "fácil", "eficiente"]
@@ -98,68 +99,62 @@ Responde SOLO en JSON:
 """
         elif self.role == "Tester":
             prompt = f"""
-Eres Tester. Evalúa verificabilidad y genera casos de prueba.
+Eres Tester. Evalúa verificabilidad y genera como máximo 3 casos de prueba simples.
 Requisito: {text}
 Contexto: {context}
 
 Responde SOLO en JSON:
 {{
   "verificabilidad": true/false,
-  "casos_prueba": ["caso 1", "caso 2"],
+  "casos_prueba": ["caso 1", "caso 2", "caso 3"],
   "porcentaje": 0-100
 }}
 """
         else:
             return {"role": self.role, "analysis": "Rol no definido", "porcentaje": 0}
 
-        # ---- Ejecución del análisis ----
-        response_text = ask_gemini(prompt)
+        # ---- Ejecución del análisis (async) ----
+        response_text = await ask_gemini(prompt)
         analysis = safe_json_loads(response_text)
         return {"role": self.role, "analysis": analysis, "porcentaje": analysis.get("porcentaje", 0)}
 
 
 # ------------------- Orquestador colaborativo -------------------
-def orchestrate(req: Dict[str, Any]) -> Dict[str, Any]:
-    """Ejecuta los agentes, consolida el análisis y decide refinamiento según el promedio."""
-    agents_list = [
-        Agent("Product Owner").analyze(req),
-        Agent("Analyst").analyze(req),
-        Agent("Scrum Master").analyze(req),
-        Agent("Tester").analyze(req),
-    ]
+async def orchestrate(req: Dict[str, Any]) -> Dict[str, Any]:
+    """Ejecuta los agentes en paralelo, consolida el análisis y decide refinamiento según el promedio."""
+
+    agents = [Agent("Product Owner"), Agent("Analyst"), Agent("Scrum Master"), Agent("Tester")]
+
+    # Ejecutar en paralelo con asyncio.gather
+    agents_list = await asyncio.gather(*[a.analyze(req) for a in agents])
 
     porcentajes = [a.get("porcentaje", 0) for a in agents_list]
     promedio = sum(porcentajes) / len(porcentajes) if porcentajes else 0
 
     # ---- Decisión según promedio ----
     if promedio < 35:
-        # Refinamiento obligatorio
         refine_prompt = f"""
-Eres un ingeniero de requisitos que coordina a un Product Owner, Analyst, Scrum Master y Tester.
-El promedio de calidad del requisito es muy bajo (<35%). Reescribe el requisito de forma clara,
-completa, atómica, consistente, verificable y viable.
+Eres un ingeniero de requisitos. El promedio es muy bajo (<35%).
+Reescribe el requisito de forma breve, clara y precisa, sin cambiar el tema original.
 
 Requisito original: {req['text']}
 Contexto: {req.get('context','')}
-Análisis de los agentes: {agents_list}
 
 Responde SOLO en JSON:
 {{
   "estado": "refinado_obligatorio",
-  "requisito_refinado_final": "texto corregido y mejorado"
+  "requisito_refinado_final": "versión corta, clara y precisa"
 }}
 """
-        refined = safe_json_loads(ask_gemini(refine_prompt))
+        refined = safe_json_loads(await ask_gemini(refine_prompt))
 
-    elif promedio < 60:
-        # Solo sugerencias de mejora
+    elif promedio <= 70:  # hasta 70 da sugerencias
         suggest_prompt = f"""
-Eres un ingeniero de requisitos. El promedio de calidad es moderado (35%-59%).
-No reescribas el requisito, solo da sugerencias de mejora claras y concretas.
+Eres un ingeniero de requisitos. El promedio es moderado (35%-70%).
+Da máximo 3 sugerencias claras y concretas de mejora.
 
 Requisito original: {req['text']}
 Contexto: {req.get('context','')}
-Análisis de los agentes: {agents_list}
 
 Responde SOLO en JSON:
 {{
@@ -167,16 +162,14 @@ Responde SOLO en JSON:
   "sugerencias": ["sugerencia 1", "sugerencia 2", "sugerencia 3"]
 }}
 """
-        refined = safe_json_loads(ask_gemini(suggest_prompt))
+        refined = safe_json_loads(await ask_gemini(suggest_prompt))
 
     elif promedio >= 90:
-        # Requisito aceptado sin cambios
         refined = {
             "estado": "aceptado",
             "requisito_refinado_final": req["text"],
         }
-    else:
-        # Caso intermedio (60-89%): se puede dejar opcional o sugerir refinamiento menor
+    else:  # 71–89 → opcional
         refined = {
             "estado": "opcional",
             "mensaje": "El requisito es aceptable pero puede mejorarse si se desea.",
@@ -198,13 +191,9 @@ Responde SOLO en JSON:
 if __name__ == "__main__":
     r = {
         "id": "RF-01",
-        "text": "El sistema debe garantizar una experiencia de usuario eficiente y un rendimiento óptimo, cumpliendo con los siguientes requisitos no funcionales:\n\n1.  **Rendimiento del Sistema:**\n    *   La carga de la página principal del listado de productos con hasta 1000 elementos no excederá los 2 segundos.\n    *   Las operaciones de búsqueda y filtrado de productos complejas se completarán en menos de 3 segundos.\n    *   La navegación entre los módulos principales (productos, categorías, informes) se realizará en menos de 1 segundo.\n\n2.  **Facilidad de Uso (Usabilidad):**\n    *   Un usuario sin experiencia previa en el sistema deberá ser capaz de crear un nuevo producto desde cero en un máximo de 5 clics y menos de 30 segundos.\n    *   La interfaz de edición masiva de atributos permitirá a los usuarios modificar 50 productos con una tasa de error inferior al 5%.\n    *   El sistema deberá obtener una puntuación mínima de 75 sobre 100 en la encuesta de System Usability Scale (SUS) aplicada a usuarios representativos tras completar tareas clave (creación, edición y búsqueda de productos).",
+        "text": "El sistema debe ser rápido y eficiente en la búsqueda de productos.",
         "context": "Sistema gestión de productos",
     }
 
-    analysis_result = orchestrate(r)
-
-    with open("resultado.json", "w", encoding="utf-8") as f:
-        json.dump(analysis_result, f, indent=2, ensure_ascii=False)
-
-    print("✅ Análisis colaborativo completado. Revisa 'resultado.json'")
+    result = asyncio.run(orchestrate(r))
+    print(json.dumps(result, indent=2, ensure_ascii=False))

@@ -1,12 +1,11 @@
+import json
+import db
+import logging
 from agents import orchestrate
 from fastapi.responses import RedirectResponse
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 from typing import List, Optional
-import json
-import db
-import logging
-
 
 # ------------------- Logging -------------------
 logging.basicConfig(
@@ -14,15 +13,12 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-
 # ------------------- Excepciones personalizadas -------------------
 class DBError(Exception):
     """Error relacionado con la base de datos."""
 
-
 class AnalysisError(Exception):
     """Error en el análisis de requisitos."""
-
 
 # ------------------- Inicializar DB -------------------
 try:
@@ -32,10 +28,8 @@ except Exception as e:  # pylint: disable=broad-exception-caught
     logging.error("❌ Error al inicializar la DB: %s", e, exc_info=True)
     raise DBError(f"No se pudo inicializar la base de datos: {e}") from e
 
-
 # ------------------- FastAPI -------------------
 app = FastAPI(title="REQ Quality Analyzer", version="0.4")
-
 
 # ------------------- Modelos -------------------
 class RequirementIn(BaseModel):
@@ -43,10 +37,8 @@ class RequirementIn(BaseModel):
     text: str = Field(..., min_length=5, description="Texto del requisito")
     context: str = Field(default="", description="Contexto adicional del requisito")
 
-
 class BatchIn(BaseModel):
     requirements: List[RequirementIn]
-
 
 # ------------------- Endpoints -------------------
 
@@ -55,19 +47,17 @@ def root():
     """Redirige automáticamente a la documentación interactiva"""
     return RedirectResponse(url="/docs")
 
-
 @app.get("/health")
 def health():
     """Endpoint para comprobar si la API está viva"""
     return {"status": "healthy", "message": "API funcionando correctamente!"}
 
-
 @app.post("/analyze")
-def analyze(req: RequirementIn):
+async def analyze(req: RequirementIn):
     """Analiza un único requisito y lo guarda en DB"""
     try:
         payload = {"id": req.id, "text": req.text, "context": req.context}
-        result = orchestrate(payload)
+        result = await orchestrate(payload)  # ✅ ahora sí espera al async
 
         db.save_result(
             req.id,
@@ -85,20 +75,18 @@ def analyze(req: RequirementIn):
     except DBError as e:
         logging.error("Error guardando en DB: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=str(e)) from e
-
     except Exception as e:  # pylint: disable=broad-exception-caught
         logging.error("Error en /analyze: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error en análisis: {e}") from e
 
-
 @app.post("/batch_analyze")
-def batch_analyze(batch: BatchIn):
+async def batch_analyze(batch: BatchIn):
     """Analiza varios requisitos a la vez"""
     results = []
     for r in batch.requirements:
         try:
             payload = {"id": r.id, "text": r.text, "context": r.context}
-            res = orchestrate(payload)
+            res = await orchestrate(payload)  # ✅ ahora sí espera al async
 
             db.save_result(r.id, r.text, r.context, json.dumps(res, ensure_ascii=False))
             results.append({"id": r.id, "status": "success", "data": res})
@@ -106,13 +94,11 @@ def batch_analyze(batch: BatchIn):
         except DBError as e:
             logging.error("DB error para requisito %s: %s", r.id, e, exc_info=True)
             results.append({"id": r.id, "status": "db_error", "error": str(e)})
-
         except Exception as e:  # pylint: disable=broad-exception-caught
             logging.warning("Error analizando requisito %s: %s", r.id, e, exc_info=True)
             results.append({"id": r.id, "status": "error", "error": str(e)})
 
     return {"status": "completed", "count": len(results), "results": results}
-
 
 @app.get("/stored")
 def get_stored(
@@ -148,7 +134,6 @@ def get_stored(
     except DBError as e:
         logging.error("Error cargando datos desde DB: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=str(e)) from e
-
     except Exception as e:  # pylint: disable=broad-exception-caught
         logging.error("Error desconocido en /stored: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error cargando datos: {e}") from e
