@@ -191,7 +191,7 @@ Responde SOLO en JSON:
 if __name__ == "__main__":
     r = {
         "id": "RF-01",
-        "text": "El sistema debe ser rápido y eficiente en la búsqueda de productos.",
+        "text": "El sistema debe ser rápido y eficiente en la búsqueda de productoss.",
         "context": "Sistema gestión de productos",
     }
 
